@@ -1,0 +1,166 @@
+import { Link } from 'react-router-dom'
+import { ArrowUpRight, CircleDot, Github, Linkedin } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Badge } from '../ui/Badge'
+import { fadeUp, baseTransition, staggerContainer } from '../../motionConfig'
+import { ScrambleText } from '../ui/TextScrambleEffect'
+import { AnimatedGridPattern } from '../ui/animated-grid-pattern'
+
+const skills = [
+  'Interfaces Web',
+  'React.js',
+  'Next.js',
+  'Tailwind CSS',
+  'Backend',
+  'Java',
+  'Spring Boot',
+  'Python',
+  'FastAPI',
+  'SQL Alchemy',
+  'MySQL',
+  'PostgreSQL',
+  'Git'
+]
+
+const stats = [
+  { label: 'Experiência Pessoal', value: '+1 anos' },
+  { label: 'Projetos Feitos', value: '+3' },
+  { label: 'Foco', value: 'Backend' },
+]
+
+export function Hero() {
+  return (
+    <section className="relative overflow-hidden border-b border-border/60 bg-gradient-to-b from-background via-background to-muted/40">
+      <AnimatedGridPattern
+        maxOpacity={0.75}
+        className="absolute inset-0 z-0 fill-neutral-900/[0.12] stroke-neutral-900/[0.16] opacity-100 [mask-image:radial-gradient(ellipse_at_center,white,transparent_75%)] dark:fill-white/[0.05] dark:stroke-white/[0.08]"
+      />
+      <div className="relative z-10 mx-auto flex max-w-5xl flex-col gap-10 px-4 py-16 sm:px-6 lg:flex-row lg:items-center lg:px-0 lg:py-20">
+        {/* Left: Copy */}
+        <motion.div
+          className="flex-1 space-y-6"
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer(0.1)}
+        >
+          <motion.div
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground backdrop-blur"
+            variants={fadeUp}
+            transition={{ ...baseTransition, delay: 0 }}
+          >
+            <CircleDot className="h-2.5 w-2.5 text-green-600 animate-pulse" />
+            <span>Disponível para novos projetos</span>
+          </motion.div>
+
+          <motion.div
+            className="space-y-3"
+            variants={fadeUp}
+            transition={{ ...baseTransition, delay: 0.05 }}
+          >
+            <h1 className="text-3xl font-medium uppercase tracking-[0.15em] text-foreground sm:text-4xl">
+              <span className="font-mono">
+                <ScrambleText text="Desenvolvedor Web & Backend" />
+              </span>
+            </h1>
+            <p className="max-w-xl text-sm leading-relaxed text-foreground text-justify">
+              Sou desenvolvedor focado na criação de sistemas web e aplicações backend,
+              transformando ideias em aplicações funcionais, escaláveis e bem estruturadas.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="flex flex-wrap items-center gap-3 text-[0.7rem] uppercase tracking-[0.2em]"
+            variants={staggerContainer(0.08)}
+          >
+            {skills.map((s) => (
+              <motion.span className='bg-transparent backdrop-blur-lg rounded-full shadow-xl' key={s} variants={fadeUp} transition={baseTransition}>
+                <Badge>{s}</Badge>
+              </motion.span>
+            ))}
+          </motion.div>
+
+          <motion.div
+            className="flex flex-wrap items-center gap-3"
+            variants={fadeUp}
+            transition={{ ...baseTransition, delay: 0.2 }}
+          >
+            <Link
+              to="/projects"
+              className="group inline-flex items-center justify-center gap-2 rounded-xl border bg-foreground px-3 py-3 text-[0.6rem] font-medium uppercase tracking-[0.25em] text-background shadow-sm transition-all hover:bg-background hover:text-foreground hover:shadow-xl"
+            >
+              <span className='text-sm'>Ver projetos</span>
+              <ArrowUpRight className="ml-1 h-4 w-4 transition-transform group-hover:-translate-y-[1px] group-hover:translate-x-[1px]" />
+            </Link>
+
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <a
+                href="https://github.com/gabrielcampeao"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="GitHub"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-border/80 bg-background/70 transition hover:-translate-y-[1px] hover:bg-foreground hover:text-background"
+              >
+                <Github className="h-3.5 w-3.5" />
+              </a>
+              <a
+                href="https://www.linkedin.com/in/gabrielcampe%C3%A3o/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="LinkedIn"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-border/80 bg-background/70 transition hover:-translate-y-[1px] hover:bg-foreground hover:text-background"
+              >
+                <Linkedin className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* Direita: Card do Perfil */}
+        <motion.div
+          className="flex-1"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...baseTransition, delay: 0.2 }}
+        >
+          <motion.div
+            className="relative overflow-hidden rounded-xl border border-white/10 bg-transparent backdrop-blur-lg p-6 shadow-xl hover:-translate-y-2 transition-all duration-300"
+            animate={{ y: [0, -25, 0] }}
+            transition={{
+              duration: 1.2,
+              times: [0, 0.35, 1],
+              ease: 'easeInOut',
+              repeat: Infinity,
+            }}
+          >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(0,0,0,0.45),_transparent_60%)]" />
+            <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
+              <div className="flex flex-col items-center gap-3 sm:items-start">
+                
+                <div className="text-center text-xs uppercase tracking-[0.25em] text-muted-foreground sm:text-left">
+                  <div className="font-medium text-foreground">Gabriel Campeão</div>
+                  <div>Curitiba - PR</div>
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-4">
+                <p className="max-w-xl text-sm leading-relaxed text-gray-500 text-justify">
+                  Gosto de transformar ideias em sistemas reais,
+                  cuidando tanto da lógica quanto da interface para
+                  entregar algo que funcione bem de verdade.
+                </p>
+                <div className="grid grid-cols-3 gap-3 text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+                  {stats.map(({ label, value }) => (
+                    <div key={label} className="space-y-1">
+                      <div className="text-[0.6rem] text-muted-foreground/80">{label}</div>
+                      <div className="text-foreground">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
