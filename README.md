@@ -1,4 +1,4 @@
-# Portfólio . Gabriel Campeão
+# Portfólio de Gabriel Campeão
 
 Site pessoal onde reúno os projetos que venho construindo, um pouco da minha trajetória e as tecnologias com que trabalho no dia a dia.
 
@@ -6,7 +6,9 @@ Site pessoal onde reúno os projetos que venho construindo, um pouco da minha tr
 
 Comecei a programar durante o ensino médio técnico e desde então venho evoluindo através da faculdade, cursos e, principalmente, colocando a mão na massa em projetos próprios. Este portfólio existe pra mostrar isso: aplicações reais, com autenticação, banco de dados e deploy, não só telas bonitas.
 
-Prefiro aprender construindo. Por isso boa parte dos projetos aqui nasceu de uma necessidade real ou de uma curiosidade técnica que eu queria resolver — não de um tutorial que segui do começo ao fim.
+Prefiro aprender construindo. Boa parte dos projetos aqui nasceu de uma necessidade real ou de uma curiosidade técnica que eu queria resolver, e quase nenhum saiu de tutorial seguido do começo ao fim.
+
+Hoje trabalho como desenvolvedor na Engaged. Os projetos pessoais continuam por aqui, no tempo que sobra.
 
 ## Stack usada neste site
 
@@ -53,4 +55,4 @@ Ainda tem coisa pra ajustar por aqui:
 
 ## Uma nota
 
-Todo o código e conteúdo deste repositório fui eu quem escrevi, como parte do meu processo de aprender desenvolvimento web na prática. Se você chegou até aqui, fica à vontade pra dar uma olhada nos projetos ou me chamar — os contatos estão no site.
+Todo o código e conteúdo deste repositório fui eu quem escrevi, como parte do meu processo de aprender desenvolvimento web na prática. Se você chegou até aqui, fica à vontade pra dar uma olhada nos projetos ou me chamar. Os contatos estão no site.

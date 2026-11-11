@@ -24,7 +24,7 @@ const skills = [
 
 const stats = [
   { label: 'Experiência Pessoal', value: '+1 anos' },
-  { label: 'Projetos Feitos', value: '+3' },
+  { label: 'Projetos Feitos', value: '+5' },
   { label: 'Foco', value: 'Backend' },
 ]
 
@@ -49,7 +49,7 @@ export function Hero() {
             transition={{ ...baseTransition, delay: 0 }}
           >
             <CircleDot className="h-2.5 w-2.5 text-green-600 animate-pulse" />
-            <span>Disponível para novos projetos</span>
+            <span>Desenvolvedor na Engaged</span>
           </motion.div>
 
           <motion.div
@@ -63,7 +63,7 @@ export function Hero() {
               </span>
             </h1>
             <p className="max-w-xl text-sm leading-relaxed text-foreground text-justify">
-              Curto tanto montar telas quanto resolver a lógica por trás delas — desde
+              Curto tanto montar telas quanto resolver a lógica por trás delas, desde
               autenticação até modelagem de banco. No fim, gosto de ver o sistema
               rodando de verdade, não só no papel.
             </p>
@@ -139,14 +139,14 @@ export function Hero() {
                 
                 <div className="text-center text-xs uppercase tracking-[0.25em] text-muted-foreground sm:text-left">
                   <div className="font-medium text-foreground">Gabriel Campeão</div>
-                  <div>Curitiba - PR</div>
+                  <div>Curitiba, PR</div>
                 </div>
               </div>
 
               <div className="flex-1 space-y-4">
                 <p className="max-w-xl text-sm leading-relaxed text-gray-500 text-justify">
                   Trabalhei com logística antes de virar dev, e isso me deixou
-                  meio obcecado por organização — dá pra ver isso no jeito que
+                  meio obcecado por organização. Dá pra ver isso no jeito que
                   estruturo os projetos.
                 </p>
                 <div className="grid grid-cols-3 gap-3 text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">

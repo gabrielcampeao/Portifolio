@@ -46,7 +46,7 @@ export function ProjectDetailPage() {
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="space-y-4">
               <div className="text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
-                {role} — {year}
+                {role} · {year}
               </div>
               <h1 className="text-2xl font-medium uppercase tracking-[0.2em] text-foreground">
                 {title}
@@ -135,6 +135,7 @@ export function ProjectDetailPage() {
       </section>
 
       {/* Preview Section - Simplificada para evitar bugs de scroll */}
+      {(liveURL || preview) && (
       <section className="bg-muted/5 py-12 lg:py-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-0">
           <div className="relative overflow-hidden rounded-xl border border-border/60 bg-background shadow-2xl">
@@ -165,6 +166,7 @@ export function ProjectDetailPage() {
           </div>
         </div>
       </section>
+      )}
     </main>
   )
 }

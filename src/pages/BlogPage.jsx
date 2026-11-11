@@ -51,8 +51,8 @@ export function BlogPage() {
           >
             Recentemente venho me aprofundando em fundamentos de redes
             (IPv4, IPv6) e cibersegurança, além de reforçar a base de
-            lógica de programação e algoritmos — pilares que sustentam
-            o meu trabalho como desenvolvedor back-end com Node.js,
+            lógica de programação e algoritmos, pilares que sustentam
+            o meu trabalho como desenvolvedor backend com Node.js,
             React, TypeScript, NestJS e Next.js.
           </motion.p>
         </div>

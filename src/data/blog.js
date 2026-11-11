@@ -8,21 +8,21 @@ export const posts = [
       'Como reduzir excessos visuais pode tornar interfaces web mais claras, consistentes e fáceis de manter.',
     readTime: '5 min read',
     content: `
-Reparei uma coisa nos projetos que fui revisitando depois de meses: as interfaces que continuavam fáceis de mexer eram sempre as mais enxutas. Menos cor, menos ruído, menos decisão visual tomada só pra preencher espaço vazio. Não é uma questão de gostar de minimalismo — é que uma interface mais contida acaba ficando mais fácil de entender e de evoluir depois.
+Reparei uma coisa nos projetos que fui revisitando depois de meses: as interfaces que continuavam fáceis de mexer eram sempre as mais enxutas. Menos cor, menos ruído, menos decisão visual tomada só pra preencher espaço vazio. Nem é questão de gostar de minimalismo: uma interface mais contida acaba ficando mais fácil de entender e de evoluir depois.
 
 ## De onde vem o excesso
 
-Isso costuma começar de um jeito bem inocente. Um botão não chama atenção o suficiente, então ganha uma cor nova. Uma seção parece "sem vida", então entra mais contraste. Cada uma dessas escolhas, isoladamente, parece pequena, mas na prática ela vira uma regra nova pro projeto — mesmo que ninguém tenha decidido isso de propósito. Com o tempo essas regras se empilham, a interface fica mais difícil de manter e começam a aparecer inconsistências entre componentes que deveriam se parecer.
+Isso costuma começar de um jeito bem inocente. Um botão não chama atenção o suficiente, então ganha uma cor nova. Uma seção parece "sem vida", então entra mais contraste. Cada uma dessas escolhas, isoladamente, parece pequena, mas na prática ela vira uma regra nova pro projeto, mesmo que ninguém tenha decidido isso de propósito. Com o tempo essas regras se empilham, a interface fica mais difícil de manter e começam a aparecer inconsistências entre componentes que deveriam se parecer.
 
 ## Trabalhando com menos
 
-Quando eu me obrigo a usar uma paleta mais restrita, as decisões ficam mais conscientes por necessidade. A hierarquia passa a depender mais da tipografia e do espaçamento do que de cor, e isso acaba deixando os componentes mais consistentes entre si — o que ajuda bastante na hora de reaproveitar peça de um lugar no outro sem retrabalho.
+Quando eu me obrigo a usar uma paleta mais restrita, as decisões ficam mais conscientes por necessidade. A hierarquia passa a depender mais da tipografia e do espaçamento do que de cor, e isso acaba deixando os componentes mais consistentes entre si, o que ajuda bastante na hora de reaproveitar peça de um lugar no outro sem retrabalho.
 
 Do lado do código, o reflexo é direto: menos variações de estilo significam menos exceções e menos remendo pra fazer um componente se encaixar num contexto que ele não foi pensado pra atender. No fim, contenção visual e organização de código andam mais juntas do que parece.
 
 ## O teste que uso
 
-Antes de criar uma cor ou variação nova, costumo parar e pensar se aquilo resolve o problema de verdade ou só disfarça ele por um tempo. Na maioria das vezes, ajustar a estrutura, revisar o espaçamento ou refinar a hierarquia resolve melhor do que adicionar mais uma opção visual. Interface que envelhece bem não é a mais chamativa — é a que continua clara e fácil de usar depois de meses sem ninguém mexer nela.
+Antes de criar uma cor ou variação nova, costumo parar e pensar se aquilo resolve o problema de verdade ou só disfarça ele por um tempo. Na maioria das vezes, ajustar a estrutura, revisar o espaçamento ou refinar a hierarquia resolve melhor do que adicionar mais uma opção visual. Interface que envelhece bem é a que continua clara e fácil de usar depois de meses sem ninguém mexer nela, mesmo sem ser a mais chamativa.
 `.trim(),
   },
   {
@@ -448,7 +448,7 @@ Remove vários documentos.
 | $in | Dentro de uma lista |
 | $nin | Fora de uma lista |
 
-                                       
+
 **Operadores Lógicos**
 
 | Operador | Função |

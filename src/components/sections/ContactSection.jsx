@@ -71,11 +71,11 @@ export function ContactSection() {
       )
 
       toast.promise(sendPromisse, {
-        loading: 'Enviando E-mail...',
+        loading: 'Enviando Email...',
         success: () => {
           localStorage.setItem('lastSent', Date.now().toString())
           setSent(true)
-          return 'E-mail enviado com sucesso!'
+          return 'Email enviado com sucesso!'
         },
         error: 'Algo deu errado 😥'
       })
@@ -112,7 +112,7 @@ export function ContactSection() {
             variants={fadeUp}
             transition={{ ...baseTransition, delay: 0.08 }}
           >
-            Ou envie um e-mail direto
+            Ou envie um email direto
             <div className="text-foreground">
               <a
                 href="mailto:gabrielcampeao0@gmail.com"
@@ -173,7 +173,7 @@ export function ContactSection() {
                   htmlFor="email"
                   className="text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground"
                 >
-                  E-mail
+                  Email
                 </label>
                 <input
                   id="email"
@@ -207,7 +207,7 @@ export function ContactSection() {
               <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-xs text-[0.7rem] leading-relaxed text-muted-foreground">
                   Ao enviar este formulário você concorda em ser contatado sobre
-                  sua solicitação. Sem newsletters, sem follow-ups automáticos.
+                  sua solicitação. Sem newsletters, sem mensagens automáticas depois.
                 </p>
                 <button
                   type="submit"
