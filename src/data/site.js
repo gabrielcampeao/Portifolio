@@ -17,6 +17,12 @@ export const capabilities = [
       'Desenho o banco de dados e a ligação entre front e back antes de sair codando, pra evitar retrabalho depois.',
     items: ['Arquitetura básica', 'CRUDs completos', 'Integração de sistemas'],
   },
+  {
+    title: 'IA no Desenvolvimento',
+    description:
+      'Trabalho com agentes de código como o Claude Code, com o escopo escrito antes e revisão minha em cada PR.',
+    items: ['Claude Code', 'Skills', 'Git worktree'],
+  },
 ]
 
 export const professionalTimeline = [

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 488" width="360" height="488" role="img" aria-label="Do paper ao merge" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+<rect width="360" height="488" rx="14" fill="#0f0f10"/>
+<text x="180.0" y="34" text-anchor="middle" font-size="11" letter-spacing="3" fill="#a1a1aa">DO PAPER AO MERGE</text>
+<rect x="40" y="58" width="280" height="46" rx="9" fill="#18181b" stroke="#3f3f46"/>
+<text x="180.0" y="86.0" text-anchor="middle" font-size="13" fill="#e4e4e7">paper de escopo</text>
+<path d="M180.0 108 V124 M175.0 119 L180.0 125 L185.0 119" fill="none" stroke="#71717a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="40" y="130" width="280" height="46" rx="9" fill="#18181b" stroke="#3f3f46"/>
+<text x="180.0" y="158.0" text-anchor="middle" font-size="13" fill="#e4e4e7">agente no worktree</text>
+<path d="M180.0 180 V196 M175.0 191 L180.0 197 L185.0 191" fill="none" stroke="#71717a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="40" y="202" width="280" height="46" rx="9" fill="#18181b" stroke="#3f3f46"/>
+<text x="180.0" y="230.0" text-anchor="middle" font-size="13" fill="#e4e4e7">testes</text>
+<path d="M180.0 252 V268 M175.0 263 L180.0 269 L185.0 263" fill="none" stroke="#71717a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="40" y="274" width="280" height="46" rx="9" fill="#18181b" stroke="#3f3f46"/>
+<text x="180.0" y="302.0" text-anchor="middle" font-size="13" fill="#e4e4e7">PR</text>
+<path d="M180.0 324 V340 M175.0 335 L180.0 341 L185.0 335" fill="none" stroke="#71717a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="40" y="346" width="280" height="46" rx="9" fill="#18181b" stroke="#3f3f46"/>
+<text x="180.0" y="374.0" text-anchor="middle" font-size="13" fill="#e4e4e7">minha revisão</text>
+<path d="M180.0 396 V412 M175.0 407 L180.0 413 L185.0 407" fill="none" stroke="#71717a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="40" y="418" width="280" height="46" rx="9" fill="#18181b" stroke="#3f3f46"/>
+<text x="180.0" y="446.0" text-anchor="middle" font-size="13" fill="#e4e4e7">merge</text>
+</svg>

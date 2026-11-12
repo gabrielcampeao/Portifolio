@@ -24,6 +24,14 @@ export function MarkdownContent({ content }) {
           </ul>
         ),
         li: ({ children }) => <li className="mb-1">{children}</li>,
+        img: ({ src, alt }) => (
+          <img
+            src={src}
+            alt={alt}
+            loading="lazy"
+            className="mx-auto my-6 block w-full max-w-sm rounded-xl border border-border/60"
+          />
+        ),
         strong: ({ children }) => (
           <strong className="font-semibold text-foreground">{children}</strong>
         ),

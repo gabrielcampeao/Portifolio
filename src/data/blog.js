@@ -531,6 +531,8 @@ MongoDB é um banco de dados NoSQL flexível e orientado a documentos. Com ele �
     content: `
 Juntei aqui o que fui anotando enquanto estudava Node.js. Está na ordem em que as coisas fizeram sentido pra mim, que nem sempre é a ordem dos cursos.
 
+![As cinco fases do event loop do Node.js, de timers até close callbacks](/diagramas/event-loop.svg)
+
 ## O que é o Node.js
 
 Node.js é um ambiente que roda JavaScript fora do navegador. Ele usa o V8, o mesmo motor do Chrome, pra executar o código, e uma biblioteca chamada libuv pra cuidar de entrada e saída: arquivo, rede, temporizador.
@@ -742,6 +744,8 @@ Ainda preciso entender melhor como investigar vazamento de memória e como ler u
     content: `
 Com Docker eu rodo banco de dados e outros serviços sem instalar nada direto na máquina. Hoje é o jeito padrão de rodar e entregar os meus projetos.
 
+![Etapas do Dockerfile até o contêiner em execução](/diagramas/docker.svg)
+
 ## Imagem e contêiner
 
 A imagem é um pacote somente leitura com o sistema de arquivos, as dependências e o comando de início da aplicação. O contêiner é uma imagem em execução, isolado do resto da máquina, mas usando o mesmo kernel do host. Por isso ele sobe em segundos, bem mais rápido que uma máquina virtual.
@@ -873,6 +877,8 @@ docker system prune
     content: `
 CI é rodar verificação automática a cada mudança de código. CD é levar essa mudança até o servidor sem alguém copiar arquivo na mão. Estudei os dois montando o pipeline da minha API de marketplace.
 
+![Etapas do pipeline, do push na main até o health check](/diagramas/ci-cd.svg)
+
 ## Integração contínua
 
 Todo push e todo pull request disparam o mesmo conjunto de passos: instalar dependências, rodar o lint, rodar os testes e fazer o build. Se um passo falha, o commit fica marcado com erro e eu fico sabendo antes de mesclar.
@@ -987,6 +993,8 @@ Pipeline lento acaba sendo ignorado, porque a tentação de mesclar sem esperar 
     content: `
 Pipeline verde diz que o código compilou e os testes passaram. Pra saber se a aplicação está bem em produção eu abro o Grafana.
 
+![Caminho das métricas, da API até o alerta por email](/diagramas/grafana.svg)
+
 ## Como as peças se ligam
 
 A aplicação expõe uma rota \`/metrics\` com contadores e histogramas em texto. O Prometheus visita essa rota de tempos em tempos e guarda os valores como séries temporais. O Grafana não guarda métrica nenhuma: ele consulta o Prometheus e desenha os gráficos.
@@ -1077,6 +1085,8 @@ Métrica mostra que algo está errado, mas raramente mostra o motivo. Pra chegar
     readTime: '8 min read',
     content: `
 Docker roda um contêiner. Kubernetes cuida de muitos: decide em qual máquina cada um roda, reinicia o que cai e troca a versão sem derrubar o serviço. Dá pra estudar tudo em um cluster local, com minikube ou kind.
+
+![Caminho de uma requisição pelo Ingress, pelo Service e pelos Pods](/diagramas/kubernetes.svg)
 
 ## As peças
 
@@ -1219,6 +1229,8 @@ Ainda não estudei Helm nem StatefulSet a fundo. Por enquanto deixo banco de dad
     content: `
 Estas são as anotações dos meus estudos de AWS pra certificação. Foquei nos assuntos mais ligados a segurança, que é a área que mais me interessa.
 
+![Fontes de log analisadas pelo GuardDuty e o caminho de um finding até o aviso](/diagramas/guardduty.svg)
+
 ## Responsabilidade compartilhada
 
 A AWS cuida da segurança da nuvem: datacenter, hardware, rede física e a camada de virtualização. O cliente cuida da segurança do que coloca na nuvem, como permissões, configuração dos serviços, criptografia e os próprios dados.
@@ -1323,6 +1335,96 @@ O GuardDuty só detecta. Ele não bloqueia nada sozinho. Pra reagir, o caminho �
 ## O que mais cai nos simulados
 
 Nos simulados, os assuntos que mais se repetem são o modelo de responsabilidade compartilhada, a diferença entre os serviços de segurança e as classes de armazenamento do S3. É fácil confundir GuardDuty com Inspector e Macie, então anotei assim: o GuardDuty detecta ameaça em andamento, o Inspector procura vulnerabilidade em instância e imagem, e o Macie encontra dado sensível dentro do S3.
+`.trim(),
+  },
+  {
+    slug: 'agentes-de-ia-no-desenvolvimento',
+    title: 'Como Uso Agentes de IA no Desenvolvimento',
+    date: 'Nov 10, 2026',
+    category: 'IA',
+    excerpt:
+      'Meu fluxo com o Claude Code: paper de escopo antes do código, skills pra tarefas repetidas e um git worktree por agente até virar PR.',
+    readTime: '7 min read',
+    content: `
+Uso o Claude Code no desenvolvimento dos meus projetos. Ele é um agente que roda no terminal: lê o repositório, executa comandos, edita arquivos e roda os testes. Anotei aqui como organizo esse trabalho, porque agente sem escopo e sem revisão entrega código que eu não consigo manter.
+
+![Fluxo do paper de escopo até o merge, passando pelo agente no worktree, pelos testes, pelo PR e pela minha revisão](/diagramas/agentes.svg)
+
+## Agente e autocompletar
+
+O autocompletar sugere a próxima linha enquanto eu digito. O agente recebe uma tarefa inteira e trabalha em vários passos: procura onde o código está, muda o que precisa, roda o teste, lê o erro e tenta de novo. Isso muda o meu papel. Passo menos tempo digitando e mais tempo definindo o que quero e conferindo o que voltou.
+
+## Paper antes do código
+
+Antes de pedir qualquer coisa maior, escrevo um paper. É um documento curto com o objetivo da mudança, o que fica de fora, as restrições e como vou saber que deu certo. Pode ser um arquivo Markdown dentro de \`docs/\`.
+
+Quando pulo essa etapa, o agente preenche as lacunas com suposições, e eu só descubro quais foram na revisão. Com o paper pronto, ele tem onde consultar e eu tenho contra o que comparar o resultado.
+
+## Instruções do projeto
+
+O Claude Code lê um arquivo \`CLAUDE.md\` na raiz do repositório no começo de cada sessão. Coloco ali o que eu teria que repetir toda vez: como rodar os testes, qual padrão de commit o projeto usa e o que ele não pode tocar.
+
+\`\`\`markdown
+# Projeto
+
+- Testes: npm test
+- Lint: npm run lint
+- Commits em português, no formato tipo: descrição
+- Nunca editar arquivos em prisma/migrations
+\`\`\`
+
+## Skills
+
+Uma skill é uma pasta com um arquivo \`SKILL.md\` que ensina o agente a fazer um tipo de tarefa. O cabeçalho diz quando ela se aplica, e o agente só carrega o resto quando a tarefa combina com a descrição.
+
+\`\`\`markdown
+---
+name: revisar-pr
+description: Use quando eu pedir a revisão de um PR antes de mesclar
+---
+
+Leia o diff completo com git diff main...HEAD.
+Liste primeiro os bugs e depois os problemas de estilo.
+Rode os testes e cole a saída.
+\`\`\`
+
+As que mais uso servem pra planejar antes de construir, revisar código, reescrever texto e testar o site no navegador com Playwright. A vantagem em relação a um prompt colado é que a skill fica versionada junto com o resto e vai melhorando a cada vez que algo sai errado.
+
+## Um worktree por agente
+
+Dois agentes editando a mesma pasta atropelam o trabalho um do outro. O \`git worktree\` resolve isso criando outra pasta de trabalho ligada ao mesmo repositório, cada uma na sua branch.
+
+\`\`\`bash
+git worktree add ../projeto-fix-login -b fix/login
+cd ../projeto-fix-login
+claude
+\`\`\`
+
+Cada agente fica na própria pasta e na própria branch. Enquanto um corrige um bug, outro pode escrever testes em outro worktree, e eu continuo na pasta principal sem conflito.
+
+\`\`\`bash
+git worktree list
+git worktree remove ../projeto-fix-login
+\`\`\`
+
+## Do worktree ao PR
+
+Quando o agente termina, o trabalho sobe como um PR normal.
+
+\`\`\`bash
+git push -u origin fix/login
+gh pr create --fill
+\`\`\`
+
+O PR passa pelo mesmo pipeline de qualquer outro: lint, testes e build. Eu leio o diff inteiro antes de mesclar. O agente erra, e os erros mais comuns que encontro são código a mais do que foi pedido e teste que passa sem testar o que importa.
+
+## Segurança
+
+O agente roda comandos na minha máquina, então trato o acesso dele como trato o de qualquer ferramenta. O \`.env\` fica fora do repositório, as permissões de comando ficam restritas ao que a tarefa precisa, e nenhuma chave entra em prompt ou em arquivo de instrução.
+
+## Onde ainda não confio
+
+Decisão de arquitetura e modelagem de banco eu ainda faço sozinho e só depois passo pro agente implementar. Ele também não sabe o contexto que não está escrito, o que é mais um motivo pra manter o paper e o \`CLAUDE.md\` em dia.
 `.trim(),
   },
 ];
