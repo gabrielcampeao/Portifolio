@@ -83,6 +83,24 @@ export const learningTimeline = [
   description:
     'Módulo de nivelamento da formação em cibersegurança, com fundamentos essenciais para atuação na área de segurança da informação.',
   },
+  {
+    number: '06',
+    title: 'Node.js e backend com JavaScript (2026)',
+    description:
+      'Estudo do Node.js por dentro: event loop, módulos, streams, servidor HTTP e testes.',
+  },
+  {
+    number: '07',
+    title: 'Docker, CI/CD e Kubernetes (2026)',
+    description:
+      'Imagens e Compose, pipeline no GitHub Actions com rollback automático, verificação de deploy no Grafana e primeiros manifests de Kubernetes.',
+  },
+  {
+    number: '08',
+    title: 'AWS: IAM, S3 e GuardDuty (2026)',
+    description:
+      'Estudos para a certificação da AWS, com foco em permissões, buckets S3 seguros e detecção de ameaças.',
+  },
 ]
 
 export const clients = [
