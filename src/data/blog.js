@@ -1343,26 +1343,41 @@ Nos simulados, os assuntos que mais se repetem são o modelo de responsabilidade
     date: 'Nov 10, 2026',
     category: 'IA',
     excerpt:
-      'Meu fluxo com o Claude Code: paper de escopo antes do código, skills pra tarefas repetidas e um git worktree por agente até virar PR.',
-    readTime: '7 min read',
+      'O que são tokens, como o Claude Code funciona por dentro, skills, plugins, como gastar menos e o que papers de Princeton, Stanford e Berkeley dizem sobre agentes de código.',
+    readTime: '12 min read',
     content: `
-Uso o Claude Code no desenvolvimento dos meus projetos. Ele é um agente que roda no terminal: lê o repositório, executa comandos, edita arquivos e roda os testes. Anotei aqui como organizo esse trabalho, porque agente sem escopo e sem revisão entrega código que eu não consigo manter.
+Uso o Claude Code no desenvolvimento dos meus projetos. Antes de contar como, anotei o que aprendi sobre o funcionamento dele, porque só passei a usar bem depois de entender onde os tokens vão parar.
 
-![Fluxo do paper de escopo até o merge, passando pelo agente no worktree, pelos testes, pelo PR e pela minha revisão](/diagramas/agentes.svg)
+## O que é um token
 
-## Agente e autocompletar
+O modelo não lê letras nem palavras. O texto é quebrado em pedaços chamados tokens, e cada token vira um número. Uma palavra curta e comum costuma ser um token só. Uma palavra longa ou rara vira vários. Em inglês, um token dá em média três quartos de uma palavra, e em português a conta costuma sair um pouco pior.
 
-O autocompletar sugere a próxima linha enquanto eu digito. O agente recebe uma tarefa inteira e trabalha em vários passos: procura onde o código está, muda o que precisa, roda o teste, lê o erro e tenta de novo. Isso muda o meu papel. Passo menos tempo digitando e mais tempo definindo o que quero e conferindo o que voltou.
+Tudo é medido em tokens: o tamanho do que o modelo consegue ler, o limite do plano e o preço. Existem dois tipos. Os tokens de entrada são tudo que o modelo recebe, e os de saída são o que ele escreve. Os de saída custam mais caro.
 
-## Paper antes do código
+## Janela de contexto
 
-Antes de pedir qualquer coisa maior, escrevo um paper. É um documento curto com o objetivo da mudança, o que fica de fora, as restrições e como vou saber que deu certo. Pode ser um arquivo Markdown dentro de \`docs/\`.
+A janela de contexto é o total de tokens que o modelo enxerga de uma vez. O modelo não guarda memória de uma chamada pra outra. A cada resposta, ele recebe de novo a conversa inteira: as instruções do sistema, a descrição das ferramentas, os arquivos de instrução do projeto, todas as mensagens e o resultado de cada comando que rodou.
 
-Quando pulo essa etapa, o agente preenche as lacunas com suposições, e eu só descubro quais foram na revisão. Com o paper pronto, ele tem onde consultar e eu tenho contra o que comparar o resultado.
+Isso explica por que uma sessão longa fica cara e pior. Um arquivo de 2 mil linhas lido no começo continua sendo enviado em todas as chamadas seguintes, até a conversa ser limpa ou resumida.
+
+## Como o Claude Code funciona
+
+O modelo sozinho só produz texto. Quem lê arquivo, roda comando e edita código é o programa em volta dele, que é chamado de harness. O Claude Code é um harness: ele entrega ao modelo uma lista de ferramentas, executa o que o modelo pede e devolve o resultado.
+
+![Ciclo do agente: o pedido vai pro modelo, o modelo chama uma ferramenta, o harness executa e o resultado volta pro contexto](/diagramas/ciclo-agente.svg)
+
+O ciclo se repete até a tarefa acabar. O modelo pede pra buscar um trecho de código, o harness busca e devolve. O modelo pede pra editar um arquivo, depois pra rodar os testes, lê o erro e tenta de novo. Cada volta soma tokens ao contexto.
+
+O harness também cuida do que o modelo não controla:
+
+- as permissões, que definem quais comandos rodam sem me perguntar
+- a compactação, que resume a conversa quando ela chega perto do limite
+- os hooks, que são comandos meus disparados antes ou depois de uma ferramenta
+- os subagentes, que fazem uma parte do trabalho em um contexto separado e devolvem só o resumo
 
 ## Instruções do projeto
 
-O Claude Code lê um arquivo \`CLAUDE.md\` na raiz do repositório no começo de cada sessão. Coloco ali o que eu teria que repetir toda vez: como rodar os testes, qual padrão de commit o projeto usa e o que ele não pode tocar.
+O Claude Code lê um arquivo \`CLAUDE.md\` na raiz do repositório no começo de cada sessão. Coloco ali o que eu teria que repetir toda vez.
 
 \`\`\`markdown
 # Projeto
@@ -1373,9 +1388,11 @@ O Claude Code lê um arquivo \`CLAUDE.md\` na raiz do repositório no começo de
 - Nunca editar arquivos em prisma/migrations
 \`\`\`
 
+Esse arquivo entra no contexto de todas as chamadas, então cada linha dele é paga o tempo todo. Mantenho curto.
+
 ## Skills
 
-Uma skill é uma pasta com um arquivo \`SKILL.md\` que ensina o agente a fazer um tipo de tarefa. O cabeçalho diz quando ela se aplica, e o agente só carrega o resto quando a tarefa combina com a descrição.
+Uma skill é uma pasta com um arquivo \`SKILL.md\` que ensina o agente a fazer um tipo de tarefa.
 
 \`\`\`markdown
 ---
@@ -1388,11 +1405,50 @@ Liste primeiro os bugs e depois os problemas de estilo.
 Rode os testes e cole a saída.
 \`\`\`
 
-As que mais uso servem pra planejar antes de construir, revisar código, reescrever texto e testar o site no navegador com Playwright. A vantagem em relação a um prompt colado é que a skill fica versionada junto com o resto e vai melhorando a cada vez que algo sai errado.
+No começo da sessão só o nome e a descrição de cada skill entram no contexto. O corpo é carregado quando a tarefa combina com a descrição. É isso que deixa ter dezenas de skills instaladas sem pagar por todas a cada mensagem, o que não acontece com um \`CLAUDE.md\` gigante.
 
-## Um worktree por agente
+## Plugins
 
-Dois agentes editando a mesma pasta atropelam o trabalho um do outro. O \`git worktree\` resolve isso criando outra pasta de trabalho ligada ao mesmo repositório, cada uma na sua branch.
+Um plugin é um pacote que junta skills, comandos, subagentes, hooks e servidores MCP, que são as conexões com ferramentas externas. Ele é instalado de um marketplace, que na prática é um repositório Git com a lista dos plugins.
+
+Uso plugins de fluxo de trabalho, que trazem skills pra planejar antes de construir, depurar e revisar, e um que encurta as respostas do agente.
+
+## Gastando menos tokens
+
+O que mais reduziu o meu consumo:
+
+- começar uma conversa nova a cada tarefa com \`/clear\`, em vez de carregar o histórico da anterior
+- usar \`/compact\` quando a conversa precisa continuar, mas já está longa
+- olhar \`/context\` pra ver o que está ocupando a janela
+- trocar pra um modelo menor com \`/model\` em tarefa simples
+- baixar o nível de esforço de raciocínio quando a tarefa é mecânica
+- mandar buscas grandes pra um subagente, que devolve só a conclusão
+- pedir um trecho do arquivo ou do log, em vez do arquivo inteiro
+- deixar regra específica em skill e manter o \`CLAUDE.md\` pequeno
+
+O harness também usa cache de prompt. O começo da conversa, que se repete igual a cada chamada, é cobrado mais barato nas chamadas seguintes. Mudar as instruções ou trocar de modelo no meio da sessão invalida esse cache.
+
+O plugin que encurta as respostas ataca os tokens de saída, que são os mais caros: tira saudação, repetição do que eu pedi e resumo no final.
+
+## O que os papers dizem
+
+Fui atrás dos estudos por trás dessas ferramentas. Estes são os que mais mudaram o meu jeito de usar.
+
+[ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629), de Princeton e do Google, de 2022. Propõe que o modelo alterne raciocínio e ação: pensa, usa uma ferramenta, observa o resultado e pensa de novo. É o ciclo que descrevi acima, e a base dos agentes de hoje.
+
+[SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770), de Princeton, de 2023. Monta um teste com 2.294 issues reais de 12 repositórios Python. Na publicação, o melhor modelo resolvia menos de 2% delas. Virou a régua usada pra medir agentes de código.
+
+[SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering](https://arxiv.org/abs/2405.15793), de Princeton, de 2024. Mostra que a interface entre o agente e o computador pesa muito no resultado. Com ferramentas de busca e edição desenhadas pro agente, a taxa de acerto no SWE-bench chegou a cerca de 12%, bem acima dos resultados publicados até então. Foi o paper que me fez dar ao harness a mesma atenção que eu dava ao modelo.
+
+[Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172), de Stanford e Berkeley, de 2023. Mede que o modelo usa melhor a informação que está no começo ou no fim do contexto e pior a que fica no meio. Por isso contexto pequeno ajuda na qualidade, além de custar menos.
+
+[Do Users Write More Insecure Code with AI Assistants?](https://arxiv.org/abs/2211.03622), de Stanford, de 2022. Os participantes que usaram assistente de IA escreveram código menos seguro e, ao mesmo tempo, confiaram mais que ele estava seguro. É o motivo de eu ler todo diff antes de mesclar.
+
+## Como eu uso pra desenvolver
+
+Antes de pedir qualquer coisa maior, escrevo o escopo em um documento curto: o objetivo da mudança, o que fica de fora, as restrições e como vou saber que deu certo. Sem isso o agente preenche as lacunas com suposições, e eu só descubro quais foram na revisão.
+
+Depois abro um worktree pra tarefa. O \`git worktree\` cria outra pasta de trabalho ligada ao mesmo repositório, cada uma na sua branch. Dois agentes editando a mesma pasta atropelam o trabalho um do outro, e com worktree cada um fica isolado.
 
 \`\`\`bash
 git worktree add ../projeto-fix-login -b fix/login
@@ -1400,31 +1456,25 @@ cd ../projeto-fix-login
 claude
 \`\`\`
 
-Cada agente fica na própria pasta e na própria branch. Enquanto um corrige um bug, outro pode escrever testes em outro worktree, e eu continuo na pasta principal sem conflito.
-
-\`\`\`bash
-git worktree list
-git worktree remove ../projeto-fix-login
-\`\`\`
-
-## Do worktree ao PR
+![Fluxo do escopo escrito até o merge, passando pelo agente no worktree, pelos testes, pelo PR e pela minha revisão](/diagramas/agentes.svg)
 
 Quando o agente termina, o trabalho sobe como um PR normal.
 
 \`\`\`bash
 git push -u origin fix/login
 gh pr create --fill
+git worktree remove ../projeto-fix-login
 \`\`\`
 
-O PR passa pelo mesmo pipeline de qualquer outro: lint, testes e build. Eu leio o diff inteiro antes de mesclar. O agente erra, e os erros mais comuns que encontro são código a mais do que foi pedido e teste que passa sem testar o que importa.
+O PR passa pelo mesmo pipeline de qualquer outro: lint, testes e build. Eu leio o diff inteiro antes de mesclar. Os erros mais comuns que encontro são código a mais do que foi pedido e teste que passa sem testar o que importa.
 
 ## Segurança
 
-O agente roda comandos na minha máquina, então trato o acesso dele como trato o de qualquer ferramenta. O \`.env\` fica fora do repositório, as permissões de comando ficam restritas ao que a tarefa precisa, e nenhuma chave entra em prompt ou em arquivo de instrução.
+O agente roda comandos na minha máquina. O \`.env\` fica fora do repositório, as permissões de comando ficam restritas ao que a tarefa precisa, e nenhuma chave entra em prompt ou em arquivo de instrução.
 
 ## Onde ainda não confio
 
-Decisão de arquitetura e modelagem de banco eu ainda faço sozinho e só depois passo pro agente implementar. Ele também não sabe o contexto que não está escrito, o que é mais um motivo pra manter o paper e o \`CLAUDE.md\` em dia.
+Decisão de arquitetura e modelagem de banco eu ainda faço sozinho e só depois passo pro agente implementar. Ele também não sabe o contexto que não está escrito, o que é mais um motivo pra manter o escopo e o \`CLAUDE.md\` em dia.
 `.trim(),
   },
 ];

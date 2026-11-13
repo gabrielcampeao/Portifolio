@@ -24,6 +24,16 @@ export function MarkdownContent({ content }) {
           </ul>
         ),
         li: ({ children }) => <li className="mb-1">{children}</li>,
+        a: ({ href, children }) => (
+          <a
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            className="text-foreground underline underline-offset-4 hover:opacity-80"
+          >
+            {children}
+          </a>
+        ),
         img: ({ src, alt }) => (
           <img
             src={src}
