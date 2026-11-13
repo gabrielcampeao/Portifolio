@@ -103,9 +103,9 @@ export const learningTimeline = [
   },
   {
     number: '08',
-    title: 'AWS: IAM, S3 e GuardDuty (2026)',
+    title: 'AWS: IAM, S3, EC2 e GuardDuty (2026)',
     description:
-      'Estudos para a certificação da AWS, com foco em permissões, buckets S3 seguros e detecção de ameaças.',
+      'Estudos para a certificação da AWS: permissões, buckets S3 seguros, instâncias EC2 atrás de load balancer e detecção de ameaças.',
   },
 ]
 

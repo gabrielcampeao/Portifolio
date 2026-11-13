@@ -39,8 +39,13 @@ export function MarkdownContent({ content }) {
             src={src}
             alt={alt}
             loading="lazy"
-            className="mx-auto my-6 block w-full max-w-sm rounded-xl border border-border/60"
+            className={`mx-auto my-6 block w-full rounded-xl border border-border/60 bg-white ${
+              src?.startsWith('/imagens/') ? 'max-w-xl' : 'max-w-sm'
+            }`}
           />
+        ),
+        em: ({ children }) => (
+          <em className="text-xs not-italic text-muted-foreground/80">{children}</em>
         ),
         strong: ({ children }) => (
           <strong className="font-semibold text-foreground">{children}</strong>

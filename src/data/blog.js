@@ -1036,6 +1036,10 @@ histogram_quantile(
 
 Os nomes das métricas dependem de como a aplicação exporta. Esses são os mais comuns em bibliotecas de Node.
 
+![Painel de demonstração do Grafana com gráficos de requisições por servidor, memória e CPU, tempo de carregamento de página, logins e tráfego de rede](/imagens/grafana-painel.png)
+
+*Imagem: [Joel Kennedy, Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Grafana_screenshot_(2018).png), domínio público. É o painel de demonstração do Grafana, não o meu.*
+
 ## Marcar o deploy no gráfico
 
 O Grafana tem anotações, que são linhas verticais no gráfico com um texto. Marco cada deploy com uma. Quando a latência sobe, dá pra ver na hora se foi logo depois de uma versão nova ou se não tem relação.
@@ -1167,6 +1171,10 @@ spec:
 
 Sem o campo \`type\`, o Service é do tipo ClusterIP e só pode ser acessado de dentro do cluster. Pra receber tráfego de fora por HTTP, com domínio e caminho, entra o Ingress.
 
+![Arquitetura do Kubernetes: o master com API Server, Scheduler, Controller Manager e etcd, e dois nodes com Kubelet, Kube Proxy e Pods](/imagens/kubernetes-arquitetura.png)
+
+*Imagem: [Khtan66, Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Kubernetes.png), licença CC BY-SA 4.0. O diagrama chama de master o que hoje a documentação chama de control plane.*
+
 ## ConfigMap e Secret
 
 Configuração fica fora da imagem. O ConfigMap guarda valores comuns e o Secret guarda os sensíveis.
@@ -1220,12 +1228,12 @@ Ainda não estudei Helm nem StatefulSet a fundo. Por enquanto deixo banco de dad
   },
   {
     slug: 'anotacoes-aws-s3-guardduty',
-    title: 'AWS: IAM, S3 e GuardDuty',
+    title: 'AWS: IAM, S3, EC2, Load Balancer e GuardDuty',
     date: 'Nov 03, 2026',
     category: 'Cloud',
     excerpt:
-      'Anotações dos meus estudos de AWS, com foco em permissões, buckets S3 configurados com segurança e detecção de ameaças com o GuardDuty.',
-    readTime: '8 min read',
+      'Anotações dos meus estudos de AWS: permissões, buckets S3 seguros, instâncias EC2, load balancer, caminho do tráfego e detecção de ameaças com o GuardDuty.',
+    readTime: '14 min read',
     content: `
 Estas são as anotações dos meus estudos de AWS pra certificação. Foquei nos assuntos mais ligados a segurança, que é a área que mais me interessa.
 
@@ -1311,6 +1319,112 @@ aws s3 presign s3://meu-bucket-de-estudo/relatorios/relatorio.pdf --expires-in 9
 
 Regra de ciclo de vida move objeto antigo pra uma classe de armazenamento mais barata ou apaga depois de um prazo. Com versionamento ligado isso é obrigatório na prática, porque as versões antigas continuam sendo cobradas.
 
+## EC2
+
+Uma instância EC2 é uma máquina virtual. Pra criar uma eu escolho a AMI, que é a imagem do sistema operacional, o tipo, que define CPU e memória, a subnet onde ela fica e o security group que controla o tráfego.
+
+O nome do tipo segue um padrão. Em \`t3.micro\`, a letra é a família, o número é a geração e a palavra é o tamanho.
+
+\`\`\`bash
+aws ec2 run-instances \\
+  --image-id ami-0123456789abcdef0 \\
+  --instance-type t3.micro \\
+  --subnet-id subnet-0123456789abcdef0 \\
+  --security-group-ids sg-0123456789abcdef0 \\
+  --iam-instance-profile Name=api-role \\
+  --user-data file://setup.sh \\
+  --metadata-options HttpTokens=required \\
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=api-1}]'
+\`\`\`
+
+## Configuração da instância
+
+O user data é um script que roda como root na primeira vez que a instância liga. É nele que a máquina se configura sozinha, sem eu entrar por SSH.
+
+\`\`\`bash
+#!/bin/bash
+dnf update -y
+dnf install -y docker
+systemctl enable --now docker
+docker run -d --restart unless-stopped -p 80:3000 ghcr.io/usuario/api:1.0.0
+\`\`\`
+
+Três configurações que anotei como padrão:
+
+- a instância recebe uma role pelo instance profile, e a aplicação usa credencial temporária em vez de chave gravada no disco
+- \`HttpTokens=required\` obriga o uso do IMDSv2, que protege o serviço de metadados contra requisição forjada
+- o acesso administrativo é pelo Session Manager, então a porta 22 fica fechada
+
+Quando a configuração está certa, ela vira um launch template. O template guarda AMI, tipo, security group e user data, e toda instância nova nasce igual.
+
+## Security group
+
+O security group é um firewall com estado ligado à instância. Tudo que entra é bloqueado até eu liberar, e a resposta de uma conexão liberada volta sem regra extra.
+
+A regra que mais importa: a instância só aceita tráfego vindo do security group do load balancer, e não da internet inteira.
+
+\`\`\`bash
+aws ec2 authorize-security-group-ingress \\
+  --group-id sg-INSTANCIA \\
+  --protocol tcp \\
+  --port 80 \\
+  --source-group sg-LOADBALANCER
+\`\`\`
+
+## Load balancer
+
+O load balancer recebe as requisições e distribui entre várias instâncias. Se uma cai, ele para de mandar tráfego pra ela.
+
+![Diagrama de balanceamento de carga: terminais ligados a um comutador, um balanceador entre a rede pública e a rede privada e dois servidores atrás dele](/imagens/balanceador-de-carga.png)
+
+*Imagem: [HFWMan, Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Load_Balancing_Cluster_(NAT)_pt.svg), licença CC BY-SA 4.0.*
+
+Na AWS existem dois tipos principais. O Application Load Balancer trabalha na camada 7, entende HTTP e roteia por domínio ou por caminho da URL. O Network Load Balancer trabalha na camada 4, com TCP e UDP, tem IP fixo e aguenta volume muito alto com latência baixa.
+
+As peças do ALB são três. O listener escuta uma porta, como a 443. O target group é o conjunto de instâncias que recebe o tráfego. O health check consulta uma rota de cada instância e tira do grupo a que não responde.
+
+\`\`\`bash
+aws elbv2 create-target-group \\
+  --name api-tg \\
+  --protocol HTTP \\
+  --port 80 \\
+  --vpc-id vpc-0123456789abcdef0 \\
+  --health-check-path /health
+
+aws elbv2 register-targets \\
+  --target-group-arn ARN_DO_TARGET_GROUP \\
+  --targets Id=i-0123456789abcdef0
+\`\`\`
+
+## Caminho do tráfego
+
+Anotei o caminho de uma requisição do navegador até a aplicação:
+
+- o Route 53 resolve o domínio pro endereço do load balancer
+- o ALB fica em subnets públicas, em pelo menos duas zonas de disponibilidade, e recebe o HTTPS com um certificado do ACM
+- o ALB escolhe uma instância saudável do target group
+- as instâncias ficam em subnets privadas, sem IP público
+- quando a instância precisa sair pra internet, pra baixar um pacote por exemplo, o tráfego passa por um NAT gateway
+
+O internet gateway é a porta da VPC pra internet, e só as subnets públicas têm rota pra ele. Deixar a aplicação em subnet privada significa que ninguém de fora chega nela sem passar pelo load balancer.
+
+## Auto Scaling
+
+O Auto Scaling group mantém um número de instâncias rodando a partir do launch template. Ele substitui a instância que falha no health check e cria ou remove instâncias conforme a carga.
+
+\`\`\`bash
+aws autoscaling create-auto-scaling-group \\
+  --auto-scaling-group-name api-asg \\
+  --launch-template LaunchTemplateName=api-lt \\
+  --min-size 2 \\
+  --max-size 6 \\
+  --vpc-zone-identifier "subnet-a,subnet-b" \\
+  --target-group-arns ARN_DO_TARGET_GROUP \\
+  --health-check-type ELB
+\`\`\`
+
+Com \`--health-check-type ELB\`, o grupo usa o health check do load balancer. Sem isso ele só olha se a máquina está ligada, e uma instância com a aplicação travada continua contando como saudável.
+
 ## GuardDuty
 
 O GuardDuty é o serviço de detecção de ameaças da AWS. Ele analisa os eventos do CloudTrail, os VPC Flow Logs e os logs de DNS sem eu precisar instalar agente. Com essas fontes ele procura comportamento suspeito e gera um achado, que a AWS chama de finding.
@@ -1343,8 +1457,8 @@ Nos simulados, os assuntos que mais se repetem são o modelo de responsabilidade
     date: 'Nov 10, 2026',
     category: 'IA',
     excerpt:
-      'O que são tokens, como o Claude Code funciona por dentro, skills, plugins, como gastar menos e o que papers de Princeton, Stanford e Berkeley dizem sobre agentes de código.',
-    readTime: '12 min read',
+      'O que são tokens, como o Claude Code funciona por dentro, skills, plugins, como gastar menos e o que papers de 2026 da ETH Zurich e da Carnegie Mellon dizem sobre isso.',
+    readTime: '13 min read',
     content: `
 Uso o Claude Code no desenvolvimento dos meus projetos. Antes de contar como, anotei o que aprendi sobre o funcionamento dele, porque só passei a usar bem depois de entender onde os tokens vão parar.
 
@@ -1411,7 +1525,7 @@ No começo da sessão só o nome e a descrição de cada skill entram no context
 
 Um plugin é um pacote que junta skills, comandos, subagentes, hooks e servidores MCP, que são as conexões com ferramentas externas. Ele é instalado de um marketplace, que na prática é um repositório Git com a lista dos plugins.
 
-Uso plugins de fluxo de trabalho, que trazem skills pra planejar antes de construir, depurar e revisar, e um que encurta as respostas do agente.
+Uso plugins de fluxo de trabalho, que trazem skills pra planejar antes de construir, depurar e revisar, e dois voltados a economia, que explico mais abaixo.
 
 ## Gastando menos tokens
 
@@ -1428,21 +1542,27 @@ O que mais reduziu o meu consumo:
 
 O harness também usa cache de prompt. O começo da conversa, que se repete igual a cada chamada, é cobrado mais barato nas chamadas seguintes. Mudar as instruções ou trocar de modelo no meio da sessão invalida esse cache.
 
-O plugin que encurta as respostas ataca os tokens de saída, que são os mais caros: tira saudação, repetição do que eu pedi e resumo no final.
+## Skills e plugins que economizam
+
+Dois plugins que deixo ligados em todas as sessões atacam direto o gasto de tokens.
+
+O ponytail faz o agente agir como um dev sênior preguiçoso: a menor mudança que resolve a tarefa, sem abstração nem opção que ninguém pediu. Menos código gerado significa menos tokens de saída e menos diff pra eu revisar.
+
+O caveman encurta a resposta em texto. Ele corta saudação, repetição do que eu pedi e resumo no final, e mantém os termos técnicos e o código intactos.
+
+Os dois funcionam com regras curtas carregadas no começo da sessão, do mesmo jeito que uma regra escrita no \`CLAUDE.md\`. Essas regras também ocupam contexto em toda chamada, então só compensam porque são poucas linhas e o que elas cortam é muito maior.
 
 ## O que os papers dizem
 
-Fui atrás dos estudos por trás dessas ferramentas. Estes são os que mais mudaram o meu jeito de usar.
+Fui atrás de estudos deste ano sobre as peças que uso todo dia: arquivo de instrução, skills, compactação e cache. Estes quatro batem com o jeito que trabalho.
 
-[ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629), de Princeton e do Google, de 2022. Propõe que o modelo alterne raciocínio e ação: pensa, usa uma ferramenta, observa o resultado e pensa de novo. É o ciclo que descrevi acima, e a base dos agentes de hoje.
+[Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?](https://arxiv.org/abs/2602.11988), da ETH Zurich, de fevereiro de 2026. É o estudo mais citado sobre arquivos como o \`CLAUDE.md\`. Os autores mediram que esses arquivos, em geral, não aumentam a taxa de tarefas resolvidas e elevam o custo de inferência em mais de 20% na média. As instruções são seguidas pelo agente, mas o resumo do repositório, que quase todo mundo coloca, não ajuda. A conclusão deles é que o arquivo serve pra registrar práticas fora do padrão. Por isso o meu tem só regras, sem descrição das pastas.
 
-[SWE-bench: Can Language Models Resolve Real-World GitHub Issues?](https://arxiv.org/abs/2310.06770), de Princeton, de 2023. Monta um teste com 2.294 issues reais de 12 repositórios Python. Na publicação, o melhor modelo resolvia menos de 2% delas. Virou a régua usada pra medir agentes de código.
+[What Keeps Agent Skills from Being Reusable? Evidence from 138K SKILL.md Files](https://arxiv.org/abs/2608.08453), de pesquisadores da City University of New York e da Ohio State, de agosto de 2026. Analisa 138.133 arquivos \`SKILL.md\` públicos e encontra pelo menos um defeito em 91,8% deles. Os problemas mais comuns são descrição fraca, corpo inchado e recursos mal organizados. Skills com nome e descrição bem escritos são encontradas pelo agente com mais confiabilidade. Por isso reviso a descrição de cada skill antes de qualquer outra parte.
 
-[SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering](https://arxiv.org/abs/2405.15793), de Princeton, de 2024. Mostra que a interface entre o agente e o computador pesa muito no resultado. Com ferramentas de busca e edição desenhadas pro agente, a taxa de acerto no SWE-bench chegou a cerca de 12%, bem acima dos resultados publicados até então. Foi o paper que me fez dar ao harness a mesma atenção que eu dava ao modelo.
+[CliffCompaction: Cost-Efficient Compaction for Long-Horizon Coding Agents](https://arxiv.org/abs/2609.26779), da Carnegie Mellon, de setembro de 2026. Propõe uma compactação que reduz o custo em até 50% mantendo o desempenho no Terminal-Bench. O ponto central é que ela só corta ou descarta conteúdo e nunca reescreve, e também nunca compacta um resumo que já foi compactado. Por isso prefiro começar conversa nova a empilhar resumo em cima de resumo.
 
-[Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172), de Stanford e Berkeley, de 2023. Mede que o modelo usa melhor a informação que está no começo ou no fim do contexto e pior a que fica no meio. Por isso contexto pequeno ajuda na qualidade, além de custar menos.
-
-[Do Users Write More Insecure Code with AI Assistants?](https://arxiv.org/abs/2211.03622), de Stanford, de 2022. Os participantes que usaram assistente de IA escreveram código menos seguro e, ao mesmo tempo, confiaram mais que ele estava seguro. É o motivo de eu ler todo diff antes de mesclar.
+[The Physical Cost of Context: Quality-Constrained Resource Accounting for Coding Agents](https://arxiv.org/abs/2610.34763), da Universidade da Califórnia e da UMass Amherst, de outubro de 2026. Mostra que contar tokens de prompt engana. Um prompt mais curto pode custar mais se ele reescreve o histórico que estava em cache, e apagar histórico pode transformar economia de tokens em trabalho extra. É o motivo de eu não mexer nas instruções no meio da sessão.
 
 ## Como eu uso pra desenvolver
 
