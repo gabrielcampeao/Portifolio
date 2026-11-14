@@ -20,8 +20,8 @@ export const capabilities = [
   {
     title: 'IA no Desenvolvimento',
     description:
-      'Trabalho com agentes de código como o Claude Code, com o escopo escrito antes e revisão minha em cada PR.',
-    items: ['Claude Code', 'Skills e plugins', 'Git worktree'],
+      'Trabalho com agentes de código como o Claude Code, com especificação antes do código e revisão minha em cada PR.',
+    items: ['Claude Code', 'Superpowers e Spec Kit', 'Git worktree'],
   },
 ]
 

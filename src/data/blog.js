@@ -1457,8 +1457,8 @@ Nos simulados, os assuntos que mais se repetem são o modelo de responsabilidade
     date: 'Nov 10, 2026',
     category: 'IA',
     excerpt:
-      'O que são tokens, como o Claude Code funciona por dentro, skills, plugins, como gastar menos e o que papers de 2026 da ETH Zurich e da Carnegie Mellon dizem sobre isso.',
-    readTime: '13 min read',
+      'O que são tokens, o que é o harness e onde fica a inteligência, como os agentes melhoram com o tempo, como gastar menos e o que papers de 2026 da ETH Zurich e da Carnegie Mellon dizem sobre isso.',
+    readTime: '14 min read',
     content: `
 Uso o Claude Code no desenvolvimento dos meus projetos. Antes de contar como, anotei o que aprendi sobre o funcionamento dele, porque só passei a usar bem depois de entender onde os tokens vão parar.
 
@@ -1470,62 +1470,71 @@ Tudo é medido em tokens: o tamanho do que o modelo consegue ler, o limite do pl
 
 ## Janela de contexto
 
-A janela de contexto é o total de tokens que o modelo enxerga de uma vez. O modelo não guarda memória de uma chamada pra outra. A cada resposta, ele recebe de novo a conversa inteira: as instruções do sistema, a descrição das ferramentas, os arquivos de instrução do projeto, todas as mensagens e o resultado de cada comando que rodou.
+A janela de contexto é o total de tokens que o modelo enxerga de uma vez. O modelo não guarda memória de uma chamada pra outra. A cada resposta, ele recebe de novo a conversa inteira: as instruções do sistema, a descrição das ferramentas, todas as mensagens e o resultado de cada comando que rodou.
 
 Isso explica por que uma sessão longa fica cara e pior. Um arquivo de 2 mil linhas lido no começo continua sendo enviado em todas as chamadas seguintes, até a conversa ser limpa ou resumida.
 
-## Como o Claude Code funciona
+## Onde fica a inteligência
 
-O modelo sozinho só produz texto. Quem lê arquivo, roda comando e edita código é o programa em volta dele, que é chamado de harness. O Claude Code é um harness: ele entrega ao modelo uma lista de ferramentas, executa o que o modelo pede e devolve o resultado.
+A inteligência está no modelo. Ele é uma rede neural treinada pra prever o próximo token, e é dessa previsão que saem o raciocínio, o plano e o código. Todo o resto do que eu vejo um agente fazer vem de outro lugar.
+
+O modelo sozinho só produz texto. Ele não abre arquivo, não roda teste e não lembra do que fez ontem. Durante uma sessão os pesos dele não mudam, então ele também não aprende com a minha conversa. O que parece aprendizado dentro de uma sessão é só o contexto crescendo.
+
+## O que é o harness
+
+Harness é o programa em volta do modelo. O Claude Code é um harness. Ele transforma um modelo que escreve texto em um agente que trabalha no meu repositório.
 
 ![Ciclo do agente: o pedido vai pro modelo, o modelo chama uma ferramenta, o harness executa e o resultado volta pro contexto](/diagramas/ciclo-agente.svg)
 
-O ciclo se repete até a tarefa acabar. O modelo pede pra buscar um trecho de código, o harness busca e devolve. O modelo pede pra editar um arquivo, depois pra rodar os testes, lê o erro e tenta de novo. Cada volta soma tokens ao contexto.
+O funcionamento é um ciclo. O harness monta o contexto e manda pro modelo. O modelo responde com texto ou com um pedido de ferramenta, como ler um arquivo ou rodar um comando. O harness executa esse pedido na minha máquina e devolve o resultado como mais uma mensagem. O modelo lê, decide o próximo passo, e o ciclo se repete até a tarefa acabar.
 
-O harness também cuida do que o modelo não controla:
+O harness é responsável por tudo que fica fora da previsão de tokens:
 
-- as permissões, que definem quais comandos rodam sem me perguntar
-- a compactação, que resume a conversa quando ela chega perto do limite
-- os hooks, que são comandos meus disparados antes ou depois de uma ferramenta
+- as ferramentas, que são a lista do que o modelo pode pedir: ler, buscar, editar, rodar comando, abrir navegador
+- as permissões, que definem o que roda sem me perguntar e o que precisa da minha aprovação
+- o contexto, que ele monta a cada chamada e compacta quando chega perto do limite
+- a memória, que são anotações gravadas em arquivo e carregadas de novo na sessão seguinte
 - os subagentes, que fazem uma parte do trabalho em um contexto separado e devolvem só o resumo
+- os hooks, que são comandos meus disparados antes ou depois de uma ferramenta
 
-## Instruções do projeto
+O mesmo modelo rende resultados bem diferentes dependendo do harness. Ferramenta de busca ruim faz o modelo ler arquivo demais. Compactação ruim faz ele esquecer o que já decidiu.
 
-O Claude Code lê um arquivo \`CLAUDE.md\` na raiz do repositório no começo de cada sessão. Coloco ali o que eu teria que repetir toda vez.
+## Como os agentes melhoram com o tempo
 
-\`\`\`markdown
-# Projeto
+A melhora vem de três lugares diferentes, e demorei pra separar um do outro.
 
-- Testes: npm test
-- Lint: npm run lint
-- Commits em português, no formato tipo: descrição
-- Nunca editar arquivos em prisma/migrations
-\`\`\`
+O primeiro é o modelo. Cada versão nova é treinada de novo e chega raciocinando melhor, errando menos chamada de ferramenta e aguentando tarefas mais longas. Essa melhora chega pra mim sem eu fazer nada.
 
-Esse arquivo entra no contexto de todas as chamadas, então cada linha dele é paga o tempo todo. Mantenho curto.
+O segundo é o harness. As ferramentas ficam mais precisas, a compactação perde menos informação e o cache fica mais eficiente. O benchmark mais usado da área, o SWE-bench, mostra o tamanho disso: no fim de 2023 o melhor modelo resolvia menos de 2% das issues, e em 2024 um harness desenhado pro agente levou esse número a cerca de 12% sem trocar a geração do modelo.
+
+O terceiro é o que eu acumulo. O modelo não aprende comigo, mas o harness guarda o que eu ensino. Cada erro que se repete vira uma regra em uma skill ou uma anotação na memória, e na sessão seguinte o agente já começa sabendo. É a parte que depende de mim, e é a que mais muda o resultado no meu projeto.
 
 ## Skills
 
-Uma skill é uma pasta com um arquivo \`SKILL.md\` que ensina o agente a fazer um tipo de tarefa.
+Uma skill é um pacote de instruções que ensina o agente a fazer um tipo de tarefa, como planejar, depurar ou revisar. No começo da sessão só o nome e a descrição de cada skill entram no contexto. O corpo é carregado quando a tarefa combina com a descrição, e é isso que deixa ter dezenas de skills instaladas sem pagar por todas a cada mensagem.
 
-\`\`\`markdown
----
-name: revisar-pr
-description: Use quando eu pedir a revisão de um PR antes de mesclar
----
+Eu não escrevo esse tipo de coisa do zero. Já existem conjuntos prontos e bem testados, mantidos por gente que usa isso todo dia.
 
-Leia o diff completo com git diff main...HEAD.
-Liste primeiro os bugs e depois os problemas de estilo.
-Rode os testes e cole a saída.
+## Superpowers e Spec Kit
+
+O Superpowers é um plugin com skills que cobrem o ciclo inteiro de uma tarefa. Ele conversa comigo pra fechar o que eu quero antes de construir, escreve o plano, executa com testes primeiro, depura com método e pede revisão antes de mesclar. Em vez de eu lembrar o agente de cada etapa, a skill certa entra na hora certa.
+
+O Spec Kit é o kit do GitHub pra desenvolvimento guiado por especificação. Ele organiza o trabalho em etapas, com uma skill pra cada uma:
+
+\`\`\`
+constitution   princípios do projeto, uma vez só
+specify        o que vai ser construído e por quê
+plan           como, com a stack e a arquitetura
+tasks          a lista de tarefas
+implement      a execução
+converge       repete com implement até fechar com a especificação
 \`\`\`
 
-No começo da sessão só o nome e a descrição de cada skill entram no contexto. O corpo é carregado quando a tarefa combina com a descrição. É isso que deixa ter dezenas de skills instaladas sem pagar por todas a cada mensagem, o que não acontece com um \`CLAUDE.md\` gigante.
+A ideia dos dois é a mesma: a especificação vem antes do código e fica registrada. Uso o Superpowers no dia a dia e deixo o Spec Kit pra quando o projeto é maior e precisa de um documento que outras pessoas vão ler.
 
 ## Plugins
 
-Um plugin é um pacote que junta skills, comandos, subagentes, hooks e servidores MCP, que são as conexões com ferramentas externas. Ele é instalado de um marketplace, que na prática é um repositório Git com a lista dos plugins.
-
-Uso plugins de fluxo de trabalho, que trazem skills pra planejar antes de construir, depurar e revisar, e dois voltados a economia, que explico mais abaixo.
+Um plugin é um pacote que junta skills, comandos, subagentes, hooks e servidores MCP, que são as conexões com ferramentas externas. Ele é instalado de um marketplace, que na prática é um repositório Git com a lista dos plugins. O Superpowers chega assim, e os dois plugins de economia que explico abaixo também.
 
 ## Gastando menos tokens
 
@@ -1538,7 +1547,7 @@ O que mais reduziu o meu consumo:
 - baixar o nível de esforço de raciocínio quando a tarefa é mecânica
 - mandar buscas grandes pra um subagente, que devolve só a conclusão
 - pedir um trecho do arquivo ou do log, em vez do arquivo inteiro
-- deixar regra específica em skill e manter o \`CLAUDE.md\` pequeno
+- deixar regra específica em skill, que só carrega quando precisa
 
 O harness também usa cache de prompt. O começo da conversa, que se repete igual a cada chamada, é cobrado mais barato nas chamadas seguintes. Mudar as instruções ou trocar de modelo no meio da sessão invalida esse cache.
 
@@ -1550,15 +1559,15 @@ O ponytail faz o agente agir como um dev sênior preguiçoso: a menor mudança q
 
 O caveman encurta a resposta em texto. Ele corta saudação, repetição do que eu pedi e resumo no final, e mantém os termos técnicos e o código intactos.
 
-Os dois funcionam com regras curtas carregadas no começo da sessão, do mesmo jeito que uma regra escrita no \`CLAUDE.md\`. Essas regras também ocupam contexto em toda chamada, então só compensam porque são poucas linhas e o que elas cortam é muito maior.
+Os dois funcionam com regras curtas carregadas no começo da sessão. Essas regras também ocupam contexto em toda chamada, então só compensam porque são poucas linhas e o que elas cortam é muito maior.
 
 ## O que os papers dizem
 
-Fui atrás de estudos deste ano sobre as peças que uso todo dia: arquivo de instrução, skills, compactação e cache. Estes quatro batem com o jeito que trabalho.
+Fui atrás de estudos deste ano sobre as peças que uso todo dia: arquivo de contexto, skills, compactação e cache. Estes quatro batem com o jeito que trabalho.
 
-[Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?](https://arxiv.org/abs/2602.11988), da ETH Zurich, de fevereiro de 2026. É o estudo mais citado sobre arquivos como o \`CLAUDE.md\`. Os autores mediram que esses arquivos, em geral, não aumentam a taxa de tarefas resolvidas e elevam o custo de inferência em mais de 20% na média. As instruções são seguidas pelo agente, mas o resumo do repositório, que quase todo mundo coloca, não ajuda. A conclusão deles é que o arquivo serve pra registrar práticas fora do padrão. Por isso o meu tem só regras, sem descrição das pastas.
+[Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?](https://arxiv.org/abs/2602.11988), da ETH Zurich, de fevereiro de 2026. É o estudo mais citado sobre os arquivos de contexto que o agente lê no começo de cada sessão. Os autores mediram que esses arquivos, em geral, não aumentam a taxa de tarefas resolvidas e elevam o custo de inferência em mais de 20% na média. As instruções são seguidas pelo agente, mas o resumo do repositório, que quase todo mundo coloca, não ajuda. A conclusão deles é que o arquivo serve pra registrar práticas fora do padrão. Por isso prefiro regra em skill, que só entra quando a tarefa pede.
 
-[What Keeps Agent Skills from Being Reusable? Evidence from 138K SKILL.md Files](https://arxiv.org/abs/2608.08453), de pesquisadores da City University of New York e da Ohio State, de agosto de 2026. Analisa 138.133 arquivos \`SKILL.md\` públicos e encontra pelo menos um defeito em 91,8% deles. Os problemas mais comuns são descrição fraca, corpo inchado e recursos mal organizados. Skills com nome e descrição bem escritos são encontradas pelo agente com mais confiabilidade. Por isso reviso a descrição de cada skill antes de qualquer outra parte.
+[What Keeps Agent Skills from Being Reusable? Evidence from 138K SKILL.md Files](https://arxiv.org/abs/2608.08453), de pesquisadores da City University of New York e da Ohio State, de agosto de 2026. Analisa 138.133 arquivos \`SKILL.md\` públicos e encontra pelo menos um defeito em 91,8% deles. Os problemas mais comuns são descrição fraca, corpo inchado e recursos mal organizados. Skills com nome e descrição bem escritos são encontradas pelo agente com mais confiabilidade. É mais um motivo pra usar conjuntos prontos e bem mantidos em vez de escrever os meus.
 
 [CliffCompaction: Cost-Efficient Compaction for Long-Horizon Coding Agents](https://arxiv.org/abs/2609.26779), da Carnegie Mellon, de setembro de 2026. Propõe uma compactação que reduz o custo em até 50% mantendo o desempenho no Terminal-Bench. O ponto central é que ela só corta ou descarta conteúdo e nunca reescreve, e também nunca compacta um resumo que já foi compactado. Por isso prefiro começar conversa nova a empilhar resumo em cima de resumo.
 
@@ -1566,7 +1575,7 @@ Fui atrás de estudos deste ano sobre as peças que uso todo dia: arquivo de ins
 
 ## Como eu uso pra desenvolver
 
-Antes de pedir qualquer coisa maior, escrevo o escopo em um documento curto: o objetivo da mudança, o que fica de fora, as restrições e como vou saber que deu certo. Sem isso o agente preenche as lacunas com suposições, e eu só descubro quais foram na revisão.
+Começo pela especificação. A skill de brainstorming do Superpowers me faz perguntas até o objetivo, o que fica de fora e o critério de pronto estarem claros, e depois escreve o plano. Sem essa etapa o agente preenche as lacunas com suposições, e eu só descubro quais foram na revisão.
 
 Depois abro um worktree pra tarefa. O \`git worktree\` cria outra pasta de trabalho ligada ao mesmo repositório, cada uma na sua branch. Dois agentes editando a mesma pasta atropelam o trabalho um do outro, e com worktree cada um fica isolado.
 
@@ -1576,7 +1585,7 @@ cd ../projeto-fix-login
 claude
 \`\`\`
 
-![Fluxo do escopo escrito até o merge, passando pelo agente no worktree, pelos testes, pelo PR e pela minha revisão](/diagramas/agentes.svg)
+![Fluxo da spec até o merge, passando pelo agente no worktree, pelos testes, pelo PR e pela minha revisão](/diagramas/agentes.svg)
 
 Quando o agente termina, o trabalho sobe como um PR normal.
 
@@ -1594,7 +1603,7 @@ O agente roda comandos na minha máquina. O \`.env\` fica fora do repositório, 
 
 ## Onde ainda não confio
 
-Decisão de arquitetura e modelagem de banco eu ainda faço sozinho e só depois passo pro agente implementar. Ele também não sabe o contexto que não está escrito, o que é mais um motivo pra manter o escopo e o \`CLAUDE.md\` em dia.
+Decisão de arquitetura e modelagem de banco eu ainda faço sozinho e só depois passo pro agente implementar. Ele também não sabe o contexto que não está escrito, o que é mais um motivo pra manter a especificação e as skills em dia.
 `.trim(),
   },
 ];
