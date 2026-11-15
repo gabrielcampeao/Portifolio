@@ -1460,7 +1460,7 @@ Nos simulados, os assuntos que mais se repetem são o modelo de responsabilidade
       'O que são tokens, o que é o harness e onde fica a inteligência, como os agentes melhoram com o tempo, como gastar menos e o que papers de 2026 da ETH Zurich e da Carnegie Mellon dizem sobre isso.',
     readTime: '14 min read',
     content: `
-Uso o Claude Code no desenvolvimento dos meus projetos. Antes de contar como, anotei o que aprendi sobre o funcionamento dele, porque só passei a usar bem depois de entender onde os tokens vão parar.
+Uso o Claude Code e o Codex no desenvolvimento dos meus projetos. Antes de contar como, anotei o que aprendi sobre o funcionamento deles, porque só passei a usar bem depois de entender onde os tokens vão parar. Os exemplos são do Claude Code, mas a lógica de tokens, contexto e harness vale pros dois.
 
 ## O que é um token
 
@@ -1482,7 +1482,7 @@ O modelo sozinho só produz texto. Ele não abre arquivo, não roda teste e não
 
 ## O que é o harness
 
-Harness é o programa em volta do modelo. O Claude Code é um harness. Ele transforma um modelo que escreve texto em um agente que trabalha no meu repositório.
+Harness é o programa em volta do modelo. O Claude Code é um harness, e o Codex é outro. Ele transforma um modelo que escreve texto em um agente que trabalha no meu repositório.
 
 ![Ciclo do agente: o pedido vai pro modelo, o modelo chama uma ferramenta, o harness executa e o resultado volta pro contexto](/diagramas/ciclo-agente.svg)
 
@@ -1600,10 +1600,6 @@ O PR passa pelo mesmo pipeline de qualquer outro: lint, testes e build. Eu leio 
 ## Segurança
 
 O agente roda comandos na minha máquina. O \`.env\` fica fora do repositório, as permissões de comando ficam restritas ao que a tarefa precisa, e nenhuma chave entra em prompt ou em arquivo de instrução.
-
-## Onde ainda não confio
-
-Decisão de arquitetura e modelagem de banco eu ainda faço sozinho e só depois passo pro agente implementar. Ele também não sabe o contexto que não está escrito, o que é mais um motivo pra manter a especificação e as skills em dia.
 `.trim(),
   },
 ];
