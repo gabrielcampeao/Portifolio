@@ -3,7 +3,6 @@ import { ArrowLeft, ExternalLink, Github } from 'lucide-react'
 import { projects } from '../data/projects'
 import { SmallBadge } from '../components/ui/Badge'
 import { DotPattern } from '../components/ui/dot-pattern'
-import { DeviceFrame } from '@/components/ui/DeviceFrame'
 
 export function ProjectDetailPage() {
   const { slug } = useParams()
@@ -20,8 +19,7 @@ export function ProjectDetailPage() {
     description,
     details,
     highlights,
-    preview,
-    previewPosition,
+    previews,
     liveURL,
     githubURL,
   } = project
@@ -51,7 +49,7 @@ export function ProjectDetailPage() {
               <h1 className="text-2xl font-medium uppercase tracking-[0.2em] text-foreground">
                 {title}
               </h1>
-              <p className="max-w-xl text-sm leading-relaxed text-muted-foreground text-justify">
+              <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
                 {summary}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -82,9 +80,11 @@ export function ProjectDetailPage() {
                 <p className="text-[0.7rem] uppercase tracking-[0.3em] text-muted-foreground">
                   Visão geral
                 </p>
-                <p className="text-sm leading-relaxed text-muted-foreground text-justify">
-                  {description}
-                </p>
+                {description.map((paragraph) => (
+                  <p key={paragraph} className="text-sm leading-relaxed text-muted-foreground">
+                    {paragraph}
+                  </p>
+                ))}
               </div>
 
               {/* Botões de Ação Reposicionados para melhor UX */}
@@ -122,7 +122,7 @@ export function ProjectDetailPage() {
                 {highlights.map((h) => (
                   <li
                     key={h}
-                    className="flex items-start gap-3 text-[0.7rem] leading-relaxed text-muted-foreground text-justify"
+                    className="flex items-start gap-3 text-[0.7rem] leading-relaxed text-muted-foreground"
                   >
                     <span className="mt-2 h-px w-4 flex-shrink-0 bg-primary/50" />
                     {h}
@@ -134,38 +134,26 @@ export function ProjectDetailPage() {
         </div>
       </section>
 
-      {/* Preview Section - Simplificada para evitar bugs de scroll */}
-      {(liveURL || preview) && (
-      <section className="bg-muted/5 py-12 lg:py-20">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-0">
-          <div className="relative overflow-hidden rounded-xl border border-border/60 bg-background shadow-2xl">
-            <div className="aspect-video w-full overflow-hidden">
-              {liveURL ? (
-                <>
-                  {/* Desktop Frame */}
-                  <div className="hidden md:block h-full">
-                    <DeviceFrame url={liveURL} />
-                  </div>
-                  {/* Mobile Static Image (Melhor para performance e scroll) */}
-                  <div className="block md:hidden h-full">
-                    <img
-                      src={preview}
-                      alt={title}
-                      className={`h-full w-full object-cover ${previewPosition ?? "object-center"}`}
-                    />
-                  </div>
-                </>
-              ) : (
+      {/* Prints do projeto */}
+      {previews?.length > 0 && (
+        <section className="bg-muted/5 py-12 lg:py-20">
+          <div className="mx-auto max-w-5xl space-y-10 px-4 sm:px-6 lg:px-0">
+            <p className="text-[0.7rem] uppercase tracking-[0.3em] text-muted-foreground">
+              Prints
+            </p>
+            {previews.map(({ src, alt, caption }) => (
+              <figure key={src} className="space-y-3">
                 <img
-                  src={preview}
-                  alt={title}
-                  className={`h-full w-full object-cover ${previewPosition ?? "object-center"}`}
+                  src={src}
+                  alt={alt}
+                  loading="lazy"
+                  className="w-full rounded-xl border border-border/60 bg-background shadow-2xl"
                 />
-              )}
-            </div>
+                <figcaption className="text-xs text-muted-foreground">{caption}</figcaption>
+              </figure>
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
       )}
     </main>
   )
