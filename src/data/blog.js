@@ -1600,6 +1600,8 @@ O PR passa pelo mesmo pipeline de qualquer outro: lint, testes e build. Eu leio 
 ## Segurança
 
 O agente roda comandos na minha máquina. O \`.env\` fica fora do repositório, as permissões de comando ficam restritas ao que a tarefa precisa, e nenhuma chave entra em prompt ou em arquivo de instrução.
+
+O agente também não lê credencial e não expõe credencial. A leitura do \`.env\` e de arquivos de chave fica bloqueada nas permissões, então o valor nunca entra no contexto. Como ele não chega a ver a chave, ela não aparece em resposta, em log, em commit nem em PR.
 `.trim(),
   },
 ];
