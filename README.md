@@ -1,4 +1,4 @@
-# Portfólio de Gabriel Campeão
+# Portfólio
 
 Site pessoal onde reúno os projetos que venho construindo, um pouco da minha trajetória e as tecnologias com que trabalho no dia a dia.
 
