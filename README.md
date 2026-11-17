@@ -1,58 +1,68 @@
-# Portfólio
+# Portfolio
 
-Site pessoal onde reúno os projetos que venho construindo, um pouco da minha trajetória e as tecnologias com que trabalho no dia a dia.
+Personal site where I keep the projects I have been building, a bit of my path so far and the technologies I work with every day.
 
-## Sobre
+Live at [gabrielcampeao.xyz](https://gabrielcampeao.xyz).
 
-Comecei a programar durante o ensino médio técnico e desde então venho evoluindo através da faculdade, cursos e, principalmente, colocando a mão na massa em projetos próprios. Este portfólio existe pra mostrar isso: aplicações reais, com autenticação, banco de dados e deploy, não só telas bonitas.
+## About
 
-Prefiro aprender construindo. Boa parte dos projetos aqui nasceu de uma necessidade real ou de uma curiosidade técnica que eu queria resolver, e quase nenhum saiu de tutorial seguido do começo ao fim.
+I started programming in technical high school and have kept going through college, courses and, above all, my own projects. This portfolio exists to show that: real applications with authentication, a database and a deploy behind them.
 
-Hoje trabalho como desenvolvedor na Engaged. Os projetos pessoais continuam por aqui, no tempo que sobra.
+I prefer to learn by building. Most of the projects here came from a real need or from a technical question I wanted to answer, and almost none came from a tutorial followed start to finish.
 
-## Stack usada neste site
+Today I work as a developer at Engaged. The personal projects continue here in the time that is left.
+
+## Stack used on this site
 
 - React 18 + Vite
 - React Router DOM
 - Tailwind CSS
-- Framer Motion, pra animações
+- Framer Motion, for animations
 - Lucide Icons
 
-## O que tem aqui
+## What is here
 
-- Tema claro/escuro (com persistência entre visitas)
-- Layout responsivo, testado em mobile
-- Navegação e transições sem recarregar a página
-- Dados de projetos e blog separados da UI, pra facilitar manutenção
+- Light and dark theme that persists between visits
+- Responsive layout, tested on mobile
+- Navigation and transitions without reloading the page
+- Project and blog data kept apart from the UI, to make maintenance easier
+- Study notes on Node.js, Docker, CI/CD, Grafana, Kubernetes, AWS and AI agents
 
-## Estrutura
+## Structure
 
 ```
 src/
-├── components/     # Componentes reutilizáveis
-├── pages/          # Páginas da aplicação
-├── sections/       # Seções da interface
-├── data/           # Conteúdo (projetos, blog, etc)
-├── hooks/          # Hooks personalizados
-└── assets/         # Imagens e arquivos estáticos
+├── components/
+│   ├── layout/     # Navbar and footer
+│   ├── sections/   # Home page sections
+│   ├── ui/         # Reusable components
+│   └── utils/      # Scroll helpers
+├── pages/          # Application pages
+├── data/           # Content (projects, blog, timeline)
+├── hooks/          # Custom hooks
+├── lib/            # Shared helpers
+└── assets/         # Project screenshots
+public/
+├── diagramas/      # Diagrams used in the notes
+└── imagens/        # Images used in the notes
 ```
 
-## Rodando localmente
+## Running locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Próximos passos
+## Next steps
 
-Ainda tem coisa pra ajustar por aqui:
+There is still work to do here:
 
-- [ ] Ligar o formulário/blog a um backend próprio
-- [ ] Melhorar performance de carregamento das imagens
-- [ ] Adicionar novos projetos conforme eu for terminando
-- [ ] Trocar prints estáticos por vídeos curtos de demonstração
+- [ ] Connect the contact form and the blog to a backend of my own
+- [ ] Improve image loading performance
+- [ ] Add new projects as I finish them
+- [ ] Replace static screenshots with short demo videos
 
-## Uma nota
+## A note
 
-Todo o código e conteúdo deste repositório fui eu quem escrevi, como parte do meu processo de aprender desenvolvimento web na prática. Se você chegou até aqui, fica à vontade pra dar uma olhada nos projetos ou me chamar. Os contatos estão no site.
+I built this site as part of learning web development in practice. If you made it this far, feel free to look at the projects or get in touch. The contacts are on the site.
